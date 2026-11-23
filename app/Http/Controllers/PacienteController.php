@@ -40,16 +40,28 @@ class PacienteController extends Controller
 
     public function edit(Paciente $paciente)
     {
-        //
+        return view('pacientes.edit', compact('paciente'));
     }
 
     public function update(UpdatePacienteRequest $request, Paciente $paciente)
     {
-        //
+        $paciente->update($request->validated());
+
+        return redirect()
+            ->route('pacientes.show', $paciente)
+            ->with('ok', 'Datos del paciente actualizados.');
     }
 
     public function destroy(Paciente $paciente)
     {
-        //
+        if ($paciente->citas()->exists() || $paciente->atenciones()->exists()) {
+            return back()->with('error', 'No se puede eliminar este paciente porque tiene citas o atenciones registradas.');
+        }
+
+        $paciente->delete();
+
+        return redirect()
+            ->route('pacientes.index')
+            ->with('ok', 'Paciente eliminado correctamente.');
     }
 }
